@@ -16,10 +16,10 @@ OLIST MARKETPLACE INTEGRITY AUDIT - FEATURE LIST
 13. is_heavy_product
 14. category_dropoff_rate
 15. has_comment
-16. purchase_month_x
-17. purchase_day_of_week_x
-18. is_weekend_x
-19. is_holiday_season_x
+16. purchase_month
+17. purchase_day_of_week
+18. is_weekend
+19. is_holiday_season
 20. cluster_0
 21. cluster_1
 22. payment_boleto
