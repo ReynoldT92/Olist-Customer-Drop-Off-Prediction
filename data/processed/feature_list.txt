@@ -1,37 +1,43 @@
 OLIST MARKETPLACE INTEGRITY AUDIT - FEATURE LIST
 ======================================================================
 
-1. delivery_delay
-2. days_to_delivery
-3. is_late_delivery
-4. is_very_late
-5. is_early_delivery
-6. freight_pct
-7. is_high_freight
-8. num_items
-9. price_per_item
-10. uses_installments
-11. is_southeast
-12. is_repeatable_category
-13. is_heavy_product
-14. category_dropoff_rate
-15. has_comment
-16. purchase_month
-17. purchase_day_of_week
-18. is_weekend
-19. is_holiday_season
-20. cluster_0
-21. cluster_1
-22. payment_boleto
-23. payment_credit_card
-24. payment_debit_card
-25. state_BA
-26. state_DF
-27. state_ES
-28. state_GO
-29. state_MG
-30. state_PR
-31. state_RJ
-32. state_RS
-33. state_SC
-34. state_SP
+Total Features: 34
+Samples: 28,020
+Target Distribution: 95.0% drop-off
+
+FEATURES:
+----------------------------------------------------------------------
+  1. category_dropoff_rate
+  2. cluster_0
+  3. cluster_1
+  4. days_to_delivery
+  5. delivery_delay
+  6. freight_pct
+  7. has_comment
+  8. is_early_delivery
+  9. is_heavy_product
+ 10. is_high_freight
+ 11. is_holiday_season
+ 12. is_late_delivery
+ 13. is_repeatable_category
+ 14. is_southeast
+ 15. is_very_late
+ 16. is_weekend
+ 17. num_items
+ 18. payment_boleto
+ 19. payment_credit_card
+ 20. payment_debit_card
+ 21. price_per_item
+ 22. purchase_day_of_week
+ 23. purchase_month
+ 24. state_BA
+ 25. state_DF
+ 26. state_ES
+ 27. state_GO
+ 28. state_MG
+ 29. state_PR
+ 30. state_RJ
+ 31. state_RS
+ 32. state_SC
+ 33. state_SP
+ 34. uses_installments
