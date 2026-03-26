@@ -45,16 +45,16 @@ def load_model():
 
 try:
     model = load_model()
-    st.success("✅ Model loaded successfully!")
+    st.success("Model loaded successfully!")
 except Exception as e:
-    st.error(f"❌ Error loading model: {e}")
+    st.error(f"Error loading model: {e}")
     st.stop()
 
 # ============================================================================
 # HEADER
 # ============================================================================
 
-st.title("🛒 Olist Customer Retention Predictor")
+st.title("Olist Customer Retention Predictor")
 st.markdown("### Predict first-time customer drop-off risk")
 
 st.markdown("""
@@ -75,12 +75,12 @@ st.divider()
 # INPUT FORM
 # ============================================================================
 
-st.header("📝 Enter Customer First Order Details")
+st.header("Enter Customer First Order Details")
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.subheader("🚚 Delivery Info")
+    st.subheader("Delivery Info")
     delivery_delay = st.number_input(
         "Delivery Delay (days)",
         min_value=-30,
@@ -97,7 +97,7 @@ with col1:
     )
 
 with col2:
-    st.subheader("💰 Order Economics")
+    st.subheader("Order Economics")
     freight_pct = st.slider(
         "Freight % of Order Value",
         min_value=0.0,
@@ -123,7 +123,7 @@ with col2:
     uses_installments = st.checkbox("Uses Installment Payment", value=False)
 
 with col3:
-    st.subheader("👤 Customer & Product")
+    st.subheader("Customer & Product")
     is_southeast = st.checkbox(
         "Southeast Brazil Customer",
         value=True,
@@ -154,7 +154,7 @@ st.divider()
 # ADVANCED OPTIONS (COLLAPSED)
 # ============================================================================
 
-with st.expander("⚙️ Advanced Options (Optional)"):
+with st.expander("Advanced Options (Optional)"):
     adv_col1, adv_col2 = st.columns(2)
     
     with adv_col1:
@@ -314,7 +314,7 @@ if st.button(" Predict Drop-off Risk", type="primary"):
                 st.success(risk_level)
         
         # Recommendations
-        st.subheader("💡 Personalized Recommendations")
+        st.subheader("Personalized Recommendations")
         
         recommendations = []
         
@@ -368,14 +368,14 @@ if st.button(" Predict Drop-off Risk", type="primary"):
             st.metric("ROI", f"{roi:.1f}%")
             
             if expected_value > 0:
-                st.success("✅ Intervention recommended - Positive ROI expected")
+                st.success("Intervention recommended - Positive ROI expected")
             else:
-                st.warning("⚠️ Intervention not cost-effective at current probability")
+                st.warning("Intervention not cost-effective at current probability")
         
         # Success - prediction complete
         
     except Exception as e:
-        st.error(f"❌ Prediction error: {e}")
+        st.error(f"Prediction error: {e}")
         st.error("Please check that all inputs are valid and try again.")
 
 # ============================================================================
