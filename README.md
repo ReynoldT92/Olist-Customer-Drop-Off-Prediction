@@ -292,9 +292,8 @@ Actual Retained     174      104      (62.6% recall)
 
 **Reynold Takura Choruma**
 
-📧 Email: [Your Email]  
-🔗 LinkedIn: [Your LinkedIn]  
-💼 Portfolio: [Your Portfolio]  
+📧 Email: [chorumareynold@gmail.com]  
+🔗 LinkedIn: [www.linkedin.com/in/reynold-choruma-3b6a27127]  
 🐙 GitHub: [@ReynoldT92](https://github.com/ReynoldT92)
 
 ---
