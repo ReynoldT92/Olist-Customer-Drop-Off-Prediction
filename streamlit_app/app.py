@@ -1,7 +1,6 @@
 
 import streamlit as st
 import pandas as pd
-import numpy as np
 import pickle
 import os
 
@@ -12,7 +11,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS for styling
+# Custom CSS
 st.markdown("""
     <style>
     .main {padding: 2rem;}
@@ -37,7 +36,7 @@ def load_model():
     """Load the trained Logistic Regression model"""
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(current_dir)
-    model_path = os.path.join(project_root, 'outputs', 'models', 'logistic_regression_final.pkl')
+    model_path = os.path.join(project_root, 'outputs', 'models', 'logistic_regression_calibrated.pkl')
     
     with open(model_path, 'rb') as f:
         model = pickle.load(f)
@@ -54,14 +53,13 @@ except Exception as e:
 # HEADER
 # ============================================================================
 
-st.title("Olist Customer Retention Predictor")
+st.title("🛒 Olist Customer Retention Predictor")
 st.markdown("### Predict first-time customer drop-off risk")
 
 st.markdown("""
 **Problem:** 95% of Olist first-time customers never make a second purchase.
 
-**Solution:** This tool predicts which customers are at risk of dropping off 
-based on their first order characteristics, enabling targeted retention interventions.
+**Solution:** This tool predicts drop-off risk based on first order characteristics.
 
 **How it works:**
 1. Enter customer's first order details below
@@ -75,12 +73,12 @@ st.divider()
 # INPUT FORM
 # ============================================================================
 
-st.header("Enter Customer First Order Details")
+st.header("📝 Customer First Order Details")
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.subheader("Delivery Info")
+    st.subheader("🚚 Delivery")
     delivery_delay = st.number_input(
         "Delivery Delay (days)",
         min_value=-30,
@@ -97,7 +95,7 @@ with col1:
     )
 
 with col2:
-    st.subheader("Order Economics")
+    st.subheader("💰 Economics")
     freight_pct = st.slider(
         "Freight % of Order Value",
         min_value=0.0,
@@ -123,7 +121,7 @@ with col2:
     uses_installments = st.checkbox("Uses Installment Payment", value=False)
 
 with col3:
-    st.subheader("Customer & Product")
+    st.subheader("📍 Customer & Product")
     is_southeast = st.checkbox(
         "Southeast Brazil Customer",
         value=True,
@@ -148,46 +146,38 @@ with col3:
     
     is_weekend = st.checkbox("Weekend Purchase", value=False)
 
-st.divider()
-
-# ============================================================================
-# ADVANCED OPTIONS (COLLAPSED)
-# ============================================================================
-
-with st.expander("Advanced Options (Optional)"):
+# Advanced options
+with st.expander("⚙️ Advanced Options"):
     adv_col1, adv_col2 = st.columns(2)
     
     with adv_col1:
         purchase_month = st.selectbox(
             "Purchase Month",
             options=list(range(1, 13)),
-            index=10  # November default
+            index=10  # November
         )
         
-        payment_type = st.radio(
-            "Payment Type",
-            options=["Credit Card", "Boleto", "Debit Card"],
+        purchase_day_of_week = st.selectbox(
+            "Day of Week",
+            options=list(range(7)),
+            format_func=lambda x: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"][x],
             index=0
         )
     
     with adv_col2:
         cluster = st.selectbox(
             "Customer Segment",
-            options=["Unknown", "Budget Shoppers", "High Freight/Risk"],
+            options=["Unknown", "Budget Shoppers (0)", "High Risk (1)"],
             index=0
         )
-        
-        state = st.selectbox(
-            "Customer State",
-            options=["SP", "RJ", "MG", "RS", "PR", "SC", "BA", "DF", "ES", "GO", "Other"],
-            index=0
-        )
+
+st.divider()
 
 # ============================================================================
 # PREDICTION
 # ============================================================================
 
-if st.button(" Predict Drop-off Risk", type="primary"):
+if st.button("Predict Drop-off Risk", type="primary"):
     
     # Calculate derived features
     is_late_delivery = int(delivery_delay > 0)
@@ -195,76 +185,38 @@ if st.button(" Predict Drop-off Risk", type="primary"):
     is_early_delivery = int(delivery_delay < 0)
     is_high_freight = int(freight_pct > 20)
     
-    # Payment type one-hot encoding
-    payment_boleto = int(payment_type == "Boleto")
-    payment_credit_card = int(payment_type == "Credit Card")
-    payment_debit_card = int(payment_type == "Debit Card")
-    
     # Cluster encoding
-    cluster_0 = int(cluster == "Budget Shoppers")
-    cluster_1 = int(cluster == "High Freight/Risk")
+    cluster_0 = int(cluster == "Budget Shoppers (0)")
+    cluster_1 = int(cluster == "High Risk (1)")
     
-    # State encoding
-    state_map = {
-        'BA': 'state_BA', 'DF': 'state_DF', 'ES': 'state_ES',
-        'GO': 'state_GO', 'MG': 'state_MG', 'PR': 'state_PR',
-        'RJ': 'state_RJ', 'RS': 'state_RS', 'SC': 'state_SC',
-        'SP': 'state_SP'
-    }
-    
-    state_features = {
-        'state_BA': 0, 'state_DF': 0, 'state_ES': 0, 'state_GO': 0,
-        'state_MG': 0, 'state_PR': 0, 'state_RJ': 0, 'state_RS': 0,
-        'state_SC': 0, 'state_SP': 0
-    }
-    
-    if state in state_map:
-        state_features[state_map[state]] = 1
-    
-    # Day of week calculation
-    purchase_day_of_week = 5 if is_weekend else 2  # Saturday or Tuesday
-    
-    # Create feature vector matching training data (33 features)
+    # Create feature vector - ONLY THE 20 FEATURES THE MODEL USES!
     features = pd.DataFrame({
-        'delivery_delay': [delivery_delay],
-        'is_late_delivery': [is_late_delivery],
-        'is_very_late': [is_very_late],
-        'is_early_delivery': [is_early_delivery],
-        'freight_pct': [freight_pct],
-        'is_high_freight': [is_high_freight],
-        'num_items': [num_items],
-        'price_per_item': [price_per_item],
+        'delivery_delay': [float(delivery_delay)],
+        'is_late_delivery': [int(is_late_delivery)],
+        'is_very_late': [int(is_very_late)],
+        'is_early_delivery': [int(is_early_delivery)],
+        'freight_pct': [float(freight_pct)],
+        'is_high_freight': [int(is_high_freight)],
+        'num_items': [int(num_items)],
+        'price_per_item': [float(price_per_item)],
         'uses_installments': [int(uses_installments)],
         'is_southeast': [int(is_southeast)],
         'is_repeatable_category': [int(is_repeatable_category)],
         'is_heavy_product': [int(is_heavy_product)],
         'has_comment': [int(has_comment)],
-        'purchase_month': [purchase_month],
-        'purchase_day_of_week': [purchase_day_of_week],
+        'purchase_month': [int(purchase_month)],
+        'purchase_day_of_week': [int(purchase_day_of_week)],
         'is_weekend': [int(is_weekend)],
         'is_holiday_season': [int(is_holiday_season)],
-        'days_to_delivery': [days_to_delivery],
-        'cluster_0': [cluster_0],
-        'cluster_1': [cluster_1],
-        'payment_boleto': [payment_boleto],
-        'payment_credit_card': [payment_credit_card],
-        'payment_debit_card': [payment_debit_card],
-        'state_BA': [state_features['state_BA']],
-        'state_DF': [state_features['state_DF']],
-        'state_ES': [state_features['state_ES']],
-        'state_GO': [state_features['state_GO']],
-        'state_MG': [state_features['state_MG']],
-        'state_PR': [state_features['state_PR']],
-        'state_RJ': [state_features['state_RJ']],
-        'state_RS': [state_features['state_RS']],
-        'state_SC': [state_features['state_SC']],
-        'state_SP': [state_features['state_SP']]
+        'days_to_delivery': [int(days_to_delivery)],
+        'cluster_0': [int(cluster_0)],
+        'cluster_1': [int(cluster_1)]
     })
     
     try:
         # Make prediction
         prediction_proba = model.predict_proba(features)[0]
-        drop_off_prob = prediction_proba[1] * 100  # Convert to percentage
+        drop_off_prob = prediction_proba[1] * 100
         retention_prob = prediction_proba[0] * 100
         
         # Determine risk level
@@ -283,9 +235,9 @@ if st.button(" Predict Drop-off Risk", type="primary"):
         
         # Display results
         st.divider()
-        st.header("Prediction Results")
+        st.header("📊 Prediction Results")
         
-        # Metrics row
+        # Metrics
         metric_col1, metric_col2, metric_col3 = st.columns(3)
         
         with metric_col1:
@@ -314,39 +266,33 @@ if st.button(" Predict Drop-off Risk", type="primary"):
                 st.success(risk_level)
         
         # Recommendations
-        st.subheader("Personalized Recommendations")
+        st.subheader("💡 Personalized Recommendations")
         
         recommendations = []
         
-        # Risk-specific recommendations
         if drop_off_prob >= 95:
             recommendations.append("🚨 **URGENT:** High-risk customer - activate retention protocol immediately")
-            recommendations.append("📧 Send personalized follow-up email within 24 hours")
-            recommendations.append("🎁 Offer 20% discount coupon valid for 7 days")
         
-        # Feature-specific recommendations
-        if freight_pct > 20:
-            recommendations.append("📦 **High shipping cost detected** - Consider free shipping offer or subsidy")
+        if is_high_freight:
+            recommendations.append("📦 **High shipping cost** - Consider free shipping offer")
         
         if not is_repeatable_category:
-            recommendations.append("🔄 **Non-repeatable product** - Focus on cross-sell to recurring categories")
+            recommendations.append("🔄 **Non-repeatable product** - Cross-sell to recurring categories")
         
         if not uses_installments:
-            recommendations.append("💳 **Promote installment payments** - Historical data shows 26% retention increase")
+            recommendations.append("💳 **Promote installment payments** - 26% retention increase")
         
         if is_holiday_season:
-            recommendations.append("✅ **Holiday purchase advantage** - These customers are 61% more likely to return!")
-            recommendations.append("🎄 Send targeted holiday follow-up campaign")
+            recommendations.append("🎄 **Holiday purchase advantage** - 61% more likely to return!")
         else:
-            recommendations.append("📅 Consider seasonal promotion to re-engage")
+            recommendations.append("📅 **Consider seasonal promotion** to re-engage")
         
         if is_late_delivery:
-            recommendations.append("⏰ **Late delivery detected** - Issue apology credit or compensation")
+            recommendations.append("⏰ **Late delivery** - Issue apology credit or compensation")
         
         if not is_southeast:
-            recommendations.append("🗺️ **Non-Southeast customer** - Extra attention needed for retention")
+            recommendations.append("🗺️ **Non-Southeast customer** - Extra attention needed")
         
-        # Display recommendations
         for rec in recommendations:
             st.markdown(f"- {rec}")
         
@@ -356,9 +302,9 @@ if st.button(" Predict Drop-off Risk", type="primary"):
         roi_col1, roi_col2 = st.columns(2)
         
         with roi_col1:
-            st.markdown("**Intervention Cost:** R$ 15 per customer")
-            st.markdown("**Expected Success Rate:** 30%")
-            st.markdown("**Customer LTV (if retained):** R$ 160")
+            st.markdown("**Intervention Cost:** R$ 15")
+            st.markdown("**Success Rate:** 30%")
+            st.markdown("**Customer LTV:** R$ 160")
         
         with roi_col2:
             expected_value = (retention_prob / 100) * 160 - 15
@@ -368,24 +314,19 @@ if st.button(" Predict Drop-off Risk", type="primary"):
             st.metric("ROI", f"{roi:.1f}%")
             
             if expected_value > 0:
-                st.success("Intervention recommended - Positive ROI expected")
+                st.success("Intervention recommended")
             else:
-                st.warning("Intervention not cost-effective at current probability")
-        
-        # Success - prediction complete
+                st.warning("Intervention not cost-effective")
         
     except Exception as e:
         st.error(f"Prediction error: {e}")
-        st.error("Please check that all inputs are valid and try again.")
+        st.error("Please check inputs and try again")
 
-# ============================================================================
-# FOOTER
-# ============================================================================
-
+# Footer
 st.divider()
 st.markdown("""
 <div style='text-align: center; color: gray; padding: 20px;'>
-    <p><strong>Olist Marketplace Integrity Audit</strong> | Developed by Reynold Choruma | March 2026</p>
-    <p>Model: Logistic Regression | PR AUC: 0.9654 | Minority Class Recall: 62.6%</p>
+    <p><strong>Olist Marketplace Integrity Audit</strong> | Reynold Choruma | March 2026</p>
+    <p>Model: Calibrated Logistic Regression | PR AUC: 0.9655 | Perfect Calibration</p>
 </div>
 """, unsafe_allow_html=True)
