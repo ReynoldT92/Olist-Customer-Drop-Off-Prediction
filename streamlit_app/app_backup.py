@@ -36,7 +36,7 @@ def load_model():
     """Load the trained Logistic Regression model"""
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(current_dir)
-    model_path = os.path.join(project_root, 'outputs', 'models', 'logistic_regression_calibrated.pkl')
+    model_path = os.path.join(project_root, 'outputs', 'models', 'logistic_regression_final.pkl')
     
     with open(model_path, 'rb') as f:
         model = pickle.load(f)
@@ -221,17 +221,17 @@ if st.button("Predict Drop-off Risk", type="primary"):
         
         # Determine risk level
         if drop_off_prob >= 90:
-            risk_level = "CRITICAL RISK"
-            risk_color = "red"
-        elif drop_off_prob >= 80:
-            risk_level = "HIGH RISK"
-            risk_color = "orange"
-        elif drop_off_prob >= 60:
-            risk_level = "MEDIUM RISK"
-            risk_color = "blue"
-        else:
-            risk_level = "LOW RISK"
-            risk_color = "green"
+    risk_level = "🔴 CRITICAL RISK"
+    risk_color = "red"
+elif drop_off_prob >= 80:
+    risk_level = "🟠 HIGH RISK"
+    risk_color = "orange"
+elif drop_off_prob >= 60:
+    risk_level = "🟡 MEDIUM RISK"
+    risk_color = "blue"
+else:
+    risk_level = "🟢 LOW RISK"
+    risk_color = "green"
         
         # Display results
         st.divider()
@@ -300,19 +300,14 @@ if st.button("Predict Drop-off Risk", type="primary"):
         
         roi_col1, roi_col2 = st.columns(2)
         
-        intervention_cost = 15
-        intervention_success_rate = 0.30
-        customer_ltv = 160
-        
         with roi_col1:
-            st.markdown(f"**Intervention Cost:** R$ {intervention_cost}")
-            st.markdown(f"**Intervention Success Rate:** {intervention_success_rate:.0%}")
-            st.markdown(f"**Customer LTV:** R$ {customer_ltv}")
+            st.markdown("**Intervention Cost:** R$ 15")
+            st.markdown("**Success Rate:** 30%")
+            st.markdown("**Customer LTV:** R$ 160")
         
         with roi_col2:
-            saved_prob = (drop_off_prob / 100) * intervention_success_rate
-            expected_value = saved_prob * customer_ltv - intervention_cost
-            roi = ((expected_value + intervention_cost) / intervention_cost - 1) * 100
+            expected_value = (retention_prob / 100) * 160 - 15
+            roi = ((expected_value + 15) / 15 - 1) * 100 if expected_value > -15 else -100
             
             st.metric("Expected Value", f"R$ {expected_value:.2f}")
             st.metric("ROI", f"{roi:.1f}%")
@@ -321,11 +316,10 @@ if st.button("Predict Drop-off Risk", type="primary"):
                 st.success("Intervention recommended")
             else:
                 st.warning("Intervention not cost-effective")
-
+        
     except Exception as e:
         st.error(f"Prediction error: {e}")
         st.error("Please check inputs and try again")
-
 
 # Footer
 st.divider()

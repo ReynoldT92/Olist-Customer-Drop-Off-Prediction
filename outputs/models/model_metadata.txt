@@ -2,13 +2,12 @@ OLIST CUSTOMER DROP-OFF PREDICTION MODEL
 ======================================================================
 
 model_type: Logistic Regression
-pr_auc: 0.9654300923780836
-f1_score: 0.7100605772657085
-precision: [0.95039258 0.95038372 0.95037487 ... 0.5        1.         1.        ]
-recall: [1.00000000e+00 9.99812242e-01 9.99624484e-01 ... 1.87758167e-04
- 1.87758167e-04 0.00000000e+00]
+pr_auc: 0.03932939874185605
+f1_score: 0.12477590534241664
+precision: 0.06929510155316607
+recall: 0.6258992805755396
 minority_recall: 0.626
-training_date: 2026-04-02
+training_date: 2026-04-04
 training_samples: 22416
 test_samples: 5604
 features: 33
